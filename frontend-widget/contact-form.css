@@ -1,0 +1,102 @@
+.ff-contact-form {
+  --ff-contact-bg: #111820;
+  --ff-contact-panel: #171f29;
+  --ff-contact-text: #f4f6f8;
+  --ff-contact-muted: #aeb8c4;
+  --ff-contact-border: #344150;
+  --ff-contact-accent: #009879;
+  --ff-contact-error: #e74c3c;
+  --ff-contact-radius: 8px;
+  display: grid;
+  gap: 14px;
+  max-width: 640px;
+  padding: 22px;
+  border: 1px solid var(--ff-contact-border);
+  border-radius: var(--ff-contact-radius);
+  background: var(--ff-contact-panel);
+  color: var(--ff-contact-text);
+  font-family: inherit;
+}
+
+.ff-contact-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--ff-contact-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.ff-contact-form input,
+.ff-contact-form select,
+.ff-contact-form textarea {
+  width: 100%;
+  border: 1px solid var(--ff-contact-border);
+  border-radius: var(--ff-contact-radius);
+  background: var(--ff-contact-bg);
+  color: var(--ff-contact-text);
+  font: inherit;
+  padding: 11px 12px;
+}
+
+.ff-contact-form textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.ff-contact-form input:focus,
+.ff-contact-form select:focus,
+.ff-contact-form textarea:focus {
+  border-color: var(--ff-contact-accent);
+  outline: 2px solid color-mix(in srgb, var(--ff-contact-accent) 28%, transparent);
+}
+
+.ff-contact-form__consent {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: var(--ff-contact-muted);
+  font-size: 0.9rem;
+}
+
+.ff-contact-form__consent input {
+  width: auto;
+  margin-top: 3px;
+}
+
+.ff-contact-form__honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.ff-contact-form button {
+  min-height: 44px;
+  border: 1px solid var(--ff-contact-accent);
+  border-radius: var(--ff-contact-radius);
+  background: var(--ff-contact-accent);
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.ff-contact-form button:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.ff-contact-form__status {
+  min-height: 22px;
+  color: var(--ff-contact-muted);
+  font-size: 0.9rem;
+}
+
+.ff-contact-form__status.is-error {
+  color: var(--ff-contact-error);
+}
+
+.ff-contact-form__status.is-success {
+  color: var(--ff-contact-accent);
+}

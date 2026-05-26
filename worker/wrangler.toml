@@ -1,0 +1,8 @@
+name = "portfolio-contact-intake-api"
+main = "src/index.js"
+compatibility_date = "2026-05-26"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "portfolio_contact_intake"
+database_id = "d6e219ba-5077-47e7-9a6a-e49838f8c922"
