@@ -7,6 +7,11 @@ CREATE TABLE IF NOT EXISTS contact_inquiries (
     message TEXT NOT NULL,
     source_page TEXT,
     status TEXT NOT NULL DEFAULT 'new',
+    notification_status TEXT NOT NULL DEFAULT 'pending',
+    notification_provider TEXT,
+    notification_id TEXT,
+    notification_error TEXT,
+    notified_at TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

@@ -2,6 +2,10 @@ name = "portfolio-contact-intake-api"
 main = "src/index.js"
 compatibility_date = "2026-05-26"
 
+[vars]
+NOTIFICATION_TO = "lipeofreitas@gmail.com"
+NOTIFICATION_FROM = "Portfolio Contact <onboarding@resend.dev>"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "portfolio_contact_intake"

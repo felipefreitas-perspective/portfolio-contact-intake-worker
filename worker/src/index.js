@@ -11,6 +11,7 @@ const VALID_INQUIRY_TYPES = new Set([
   "collaboration",
   "other"
 ]);
+const RESEND_API_URL = "https://api.resend.com/emails";
 
 export default {
   async fetch(request, env) {
@@ -78,11 +79,158 @@ async function createInquiry(request, env) {
     )
     .run();
 
+  const notification = await notifyInquiry(env, id, inquiry);
+
   return jsonResponse(request, {
     ok: true,
     id,
-    status: "new"
+    status: "new",
+    notificationStatus: notification.status
   }, 201);
+}
+
+async function notifyInquiry(env, inquiryId, inquiry) {
+  if (!isNotificationConfigured(env)) {
+    const status = {
+      status: "skipped",
+      provider: "resend",
+      id: null,
+      error: "Email notification is not configured"
+    };
+    await updateNotificationStatus(env, inquiryId, status);
+    return status;
+  }
+
+  try {
+    const emailResult = await sendInquiryEmail(env, inquiryId, inquiry);
+    const status = {
+      status: "sent",
+      provider: "resend",
+      id: emailResult.id || null,
+      error: null
+    };
+    await updateNotificationStatus(env, inquiryId, status);
+    return status;
+  } catch (error) {
+    const status = {
+      status: "failed",
+      provider: "resend",
+      id: null,
+      error: normalizeNotificationError(error)
+    };
+    await updateNotificationStatus(env, inquiryId, status);
+    return status;
+  }
+}
+
+function isNotificationConfigured(env) {
+  return Boolean(
+    env.RESEND_API_KEY &&
+    env.NOTIFICATION_TO &&
+    env.NOTIFICATION_FROM
+  );
+}
+
+async function sendInquiryEmail(env, inquiryId, inquiry) {
+  const response = await fetch(RESEND_API_URL, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+      "Idempotency-Key": inquiryId
+    },
+    body: JSON.stringify({
+      from: env.NOTIFICATION_FROM,
+      to: [env.NOTIFICATION_TO],
+      reply_to: inquiry.email,
+      subject: `Portfolio inquiry: ${formatInquiryType(inquiry.inquiryType)}`,
+      text: buildNotificationText(inquiryId, inquiry),
+      html: buildNotificationHtml(inquiryId, inquiry)
+    })
+  });
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(result?.message || `Resend API returned ${response.status}`);
+  }
+
+  return result;
+}
+
+async function updateNotificationStatus(env, inquiryId, notification) {
+  await env.DB.prepare(`
+    UPDATE contact_inquiries
+    SET
+      notification_status = ?,
+      notification_provider = ?,
+      notification_id = ?,
+      notification_error = ?,
+      notified_at = CASE WHEN ? = 'sent' THEN CURRENT_TIMESTAMP ELSE notified_at END,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `)
+    .bind(
+      notification.status,
+      notification.provider,
+      notification.id,
+      notification.error,
+      notification.status,
+      inquiryId
+    )
+    .run();
+}
+
+function buildNotificationText(inquiryId, inquiry) {
+  return [
+    "New portfolio contact inquiry",
+    "",
+    `Inquiry ID: ${inquiryId}`,
+    `Name: ${inquiry.name}`,
+    `Email: ${inquiry.email}`,
+    `Type: ${formatInquiryType(inquiry.inquiryType)}`,
+    `Source: ${inquiry.sourcePage || "Not provided"}`,
+    "",
+    "Message:",
+    inquiry.message
+  ].join("\n");
+}
+
+function buildNotificationHtml(inquiryId, inquiry) {
+  return `
+    <div style="font-family: Arial, sans-serif; color: #1f2937; line-height: 1.5;">
+      <h2 style="margin: 0 0 16px;">New portfolio contact inquiry</h2>
+      <p><strong>Inquiry ID:</strong> ${escapeHtml(inquiryId)}</p>
+      <p><strong>Name:</strong> ${escapeHtml(inquiry.name)}</p>
+      <p><strong>Email:</strong> ${escapeHtml(inquiry.email)}</p>
+      <p><strong>Type:</strong> ${escapeHtml(formatInquiryType(inquiry.inquiryType))}</p>
+      <p><strong>Source:</strong> ${escapeHtml(inquiry.sourcePage || "Not provided")}</p>
+      <hr style="border: 0; border-top: 1px solid #d1d5db; margin: 20px 0;" />
+      <p style="white-space: pre-wrap;">${escapeHtml(inquiry.message)}</p>
+    </div>
+  `;
+}
+
+function formatInquiryType(value) {
+  return String(value || "")
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function normalizeNotificationError(error) {
+  return String(error?.message || error || "Unknown email notification error")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 500);
 }
 
 function validateInquiryPayload(payload) {

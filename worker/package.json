@@ -7,7 +7,9 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "db:migrate:local": "wrangler d1 execute portfolio_contact_intake --local --file=./schema.sql",
-    "db:migrate:remote": "wrangler d1 execute portfolio_contact_intake --remote --file=./schema.sql"
+    "db:migrate:remote": "wrangler d1 execute portfolio_contact_intake --remote --file=./schema.sql",
+    "db:migrate:notification:local": "wrangler d1 execute portfolio_contact_intake --local --file=./migrations/0001_add_notification_columns.sql",
+    "db:migrate:notification:remote": "wrangler d1 execute portfolio_contact_intake --remote --file=./migrations/0001_add_notification_columns.sql"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"
