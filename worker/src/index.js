@@ -1,6 +1,7 @@
 const ALLOWED_ORIGINS = new Set([
   "http://127.0.0.1:8123",
   "http://localhost:8123",
+  "https://felipefreitas-perspective.github.io",
   "https://lipeofreitas.github.io"
 ]);
 
@@ -341,7 +342,7 @@ function jsonResponse(request, body, status = 200) {
 
 function corsHeaders(request) {
   const origin = request.headers.get("Origin");
-  const allowOrigin = ALLOWED_ORIGINS.has(origin) ? origin : "https://lipeofreitas.github.io";
+  const allowOrigin = ALLOWED_ORIGINS.has(origin) ? origin : "https://felipefreitas-perspective.github.io";
 
   return {
     "Access-Control-Allow-Origin": allowOrigin,

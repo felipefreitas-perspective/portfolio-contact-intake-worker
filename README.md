@@ -128,7 +128,7 @@ Current stack:
 Current notification setup:
 
 - Resend
-- `NOTIFICATION_TO` is currently configured for `lipeofreitas@gmail.com`.
+- `NOTIFICATION_TO` is configured as a Cloudflare Worker secret for a private notification inbox.
 - `NOTIFICATION_FROM` uses the Resend test sender for the MVP.
 - `RESEND_API_KEY` is stored as a Cloudflare Worker secret and must not be committed.
 
@@ -190,7 +190,7 @@ failed   - email request failed, but the inquiry remains stored
 skipped  - notification secrets or variables are not configured
 ```
 
-The destination address can be changed without code changes by updating the `NOTIFICATION_TO` variable. The current MVP sends notifications to `lipeofreitas@gmail.com`; this can later become a professional inbox or forwarded business email.
+The destination address can be changed without code changes by updating the `NOTIFICATION_TO` Worker secret. The current MVP sends notifications to a private inbox; this can later become a professional inbox or forwarded business email.
 
 ### API Endpoints
 
@@ -209,7 +209,7 @@ Example request:
   "inquiryType": "project",
   "message": "I would like to discuss a dashboard and automation project.",
   "consent": true,
-  "sourcePage": "https://lipeofreitas.github.io/#contact"
+  "sourcePage": "https://felipefreitas-perspective.github.io/#contact"
 }
 ```
 
@@ -265,6 +265,12 @@ Set the Resend API key as a Cloudflare Worker secret:
 
 ```powershell
 npx wrangler secret put RESEND_API_KEY
+```
+
+Set the private notification destination as a Cloudflare Worker secret:
+
+```powershell
+npx wrangler secret put NOTIFICATION_TO
 ```
 
 Run locally:
